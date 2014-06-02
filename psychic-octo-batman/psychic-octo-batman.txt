@@ -1,0 +1,7 @@
+## Title: psychic-octo-batman
+## Version: 0.0
+## Author: Fuefib
+## APIVersion: 100004
+## 
+
+src/psychic-octo-batman.lua
