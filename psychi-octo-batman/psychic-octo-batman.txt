@@ -4,4 +4,10 @@
 ## APIVersion: 100004
 ## 
 
+## LIB
+LibStub/LibStub.lua
+libMsg/libMsg.lua
+
+## ADDON
 src/psychic-octo-batman.lua
+

@@ -4,7 +4,7 @@ if not libMsg then return end
 
 
 libMsg.isLogDebug = false
-libMsg.separator = "$#$"
+libMsg.separator = "___"
 
 
 libMsg.debug = function(s)
@@ -16,17 +16,17 @@ function trim1(s)
   return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
--- Send message to the recipient for this addonId
-libMsg.sendMsg = function (addonId, recipient, msg)
+-- Send message to the recipient for this code
+libMsg.sendMsg = function (code, recipient, msg)
 	-- Removing current message
 	libMsg.clearRecipient(recipient)
 
 	-- Sending message
-	RequestFriend(recipient, addonId .. libMsg.separator .. msg)
+	RequestFriend(recipient, code .. libMsg.separator .. msg)
 end
 
--- Recieve all the message for this addonId
-libMsg.receiveAllMsg = function (addonId)
+-- Recieve all the message for this code
+libMsg.receiveAllMsg = function (code)
 
 	local msgs = {}
 
@@ -37,14 +37,14 @@ libMsg.receiveAllMsg = function (addonId)
     -- Parsing all the requests
     for id=1,numReq
     do
-        local name,time,message = GetIncomingFriendRequestInfo(id)
+        local name,timesent,message = GetIncomingFriendRequestInfo(id)
 
-        -- Only take request containing the addonId
-        if(message:find(addonId .. libMsg.separator)){
-        	message = trim1(message)
+        -- Only take request containing the code
+        if(message:find(code .. libMsg.separator)) then
+        	--message = trim1(message)
         	libMsg.debug(name .. " sent " .. message)
         	msgs[name] = message
-        }
+        end
     end
 
     -- Cleaning received messages
@@ -54,13 +54,13 @@ libMsg.receiveAllMsg = function (addonId)
     return msgs
 end
 
--- Get the next message for this addonId
-libMsg.receiveNextMsg = function (addonId)
+-- Get the next message for this code
+libMsg.receiveNextMsg = function (code)
 	-- TODO
 end
 
--- Clear all message for this addonId
-libMsg.clearMsgForId = function (addonId)
+-- Clear all message for this code
+libMsg.clearMsgForId = function (code)
 	libMsg.clearMsg(libMsg.receiveAllMsg)
 end
 
@@ -71,9 +71,27 @@ libMsg.clearMsg = function (msgs)
 	end
 end
 
+-- Cancel active friend request for the recipient
+libMsg.clearOutgoing = function (recipient)
+	local numOut = GetNumOutgoingFriendRequests()
+	local cancelId = -1
+	
+	for outId=1,numOut do
+		local name = GetOutgoingFriendRequestInfo(outId)
+		
+		if(name == recipient) then
+			cancelId = outId
+		end
+	end
+
+	if(cancelId > -1) then
+		CancelFriendRequest(cancelId)
+	end
+end
+
 -- Remove all friend request (in or out) relative to the recipient
 libMsg.clearRecipient = function (recipient)
+	libMsg.clearOutgoing(recipient)
 	RejectFriendRequest(recipient)
-	CancelFriendRequest(recipient)
 	RemoveFriend(recipient)
 end
